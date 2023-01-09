@@ -1,11 +1,13 @@
 {
     "name": "syncyt",
     "private": true,
+    "license": "AGPL-3.0",
     "version": "0.0.0",
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "build": "tsc && vite build",
+        "build": "tsc && vite build && cd server/ && tsc",
+        "start": "node server/dist/server.js",
         "preview": "vite preview",
         "fmt": "prettier --write ."
     },

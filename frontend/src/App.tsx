@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, createRef, useEffect } from 'react';
 import { Box, Button, Heading, Input, Text } from '@chakra-ui/react';
 import { embeddedYoutubeUrlAtom } from './states/atoms';
 import { useAtom } from 'jotai';
@@ -10,23 +10,49 @@ const InputEmbeddedYouTubeUrl = () => {
             <Input
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                placeholder="Enter YouTube URL"
+                placeholder="Enter Embedded YouTube URL"
             />
             <Button onClick={() => setUrl(url)}>Submit</Button>
         </Box>
     );
 };
 
-interface RenderIFrameProps {
-    embeddedUrl: string;
+interface PlayerOpts {
+    embeddedUrl?: string;
 }
 
-const RenderIFrame = (renderIFrameProps: RenderIFrameProps) => {
-    return <iframe src={renderIFrameProps.embeddedUrl} />;
+type PlayerComponent = JSX.Element;
+
+interface Player {
+    iframeRef: React.RefObject<HTMLIFrameElement>;
+    playerComponent: PlayerComponent;
+}
+
+const createPlayer = (playerOpts: PlayerOpts): Player => {
+    const iframeRef = createRef<HTMLIFrameElement>();
+    const playerComponent = (
+        <iframe src={playerOpts.embeddedUrl} ref={iframeRef} />
+    );
+    return { iframeRef, playerComponent };
+};
+
+interface RenderPlayerProps {
+    playerComponent: PlayerComponent;
+}
+
+const RenderPlayer = (renderPlayerProps: RenderPlayerProps) => {
+    const { playerComponent } = renderPlayerProps;
+    return <Box>{playerComponent}</Box>;
 };
 
 function App() {
     const [url, setUrl] = useAtom(embeddedYoutubeUrlAtom);
+    const [player, setPlayer] = useState<Player>(createPlayer({}));
+
+    useEffect(() => {
+        const playerOpts = { embeddedUrl: url };
+        setPlayer(createPlayer(playerOpts));
+    });
     return (
         <Box>
             <Heading>Syncyt</Heading>
@@ -34,7 +60,7 @@ function App() {
                 Watch YouTube videos with your friends synchronously
             </Text>
             <InputEmbeddedYouTubeUrl />
-            <RenderIFrame embeddedUrl={url} />
+            <RenderPlayer playerComponent={player!.playerComponent} />
         </Box>
     );
 }

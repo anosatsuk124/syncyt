@@ -1,3 +1,6 @@
 import { atom } from 'jotai';
+import { PlayerOpts } from './types';
 
-export const embeddedYoutubeUrlAtom = atom('');
+export const playerOptsAtom = atom<PlayerOpts>({
+    embeddedUrl: '',
+});

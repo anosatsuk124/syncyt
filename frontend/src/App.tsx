@@ -1,25 +1,23 @@
 import { useState, useRef, createRef, useEffect } from 'react';
 import { Box, Button, Heading, Input, Text } from '@chakra-ui/react';
-import { embeddedYoutubeUrlAtom } from './states/atoms';
+import { playerOptsAtom } from './states/atoms';
+import { PlayerOpts } from './states/types';
 import { useAtom } from 'jotai';
 
 const InputEmbeddedYouTubeUrl = () => {
-    const [url, setUrl] = useAtom(embeddedYoutubeUrlAtom);
+    const [optsJotai, setOptsJotai] = useAtom(playerOptsAtom);
+    const [opts, setOpts] = useState<PlayerOpts>(optsJotai);
     return (
         <Box>
             <Input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
+                value={opts.embeddedUrl}
+                onChange={(e) => setOpts({ embeddedUrl: e.target.value })}
                 placeholder="Enter Embedded YouTube URL"
             />
-            <Button onClick={() => setUrl(url)}>Submit</Button>
+            <Button onClick={() => setOptsJotai(opts)}>Submit</Button>
         </Box>
     );
 };
-
-interface PlayerOpts {
-    embeddedUrl?: string;
-}
 
 type PlayerComponent = JSX.Element;
 
@@ -46,13 +44,9 @@ const RenderPlayer = (renderPlayerProps: RenderPlayerProps) => {
 };
 
 function App() {
-    const [url, setUrl] = useAtom(embeddedYoutubeUrlAtom);
-    const [player, setPlayer] = useState<Player>(createPlayer({}));
+    const [opts, setOpts] = useAtom(playerOptsAtom);
+    const player = createPlayer(opts);
 
-    useEffect(() => {
-        const playerOpts = { embeddedUrl: url };
-        setPlayer(createPlayer(playerOpts));
-    });
     return (
         <Box>
             <Heading>Syncyt</Heading>

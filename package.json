@@ -8,7 +8,10 @@
     "private": true,
     "scripts": {
         "fmt": "prettier --write .",
-        "build": "tsc && cd frontend && run-s build",
+        "build": "run-p build:*",
+        "build:frontend": "cd frontend && run-s build",
+        "build:server": "tsc",
+        "prestart": "run-s build",
         "start": "node dist/server.js"
     },
     "dependencies": {

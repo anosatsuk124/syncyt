@@ -11,3 +11,4 @@
 
 # Ignore the runtime specific files
 /.env
+node_modules

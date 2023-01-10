@@ -3,7 +3,9 @@ import express from 'express';
 import http from 'http';
 import { config } from 'dotenv';
 
-const result = config();
+const result = config({
+    path: '../env/server/.env',
+});
 
 const PORT = Number(process.env.PORT) || 3000;
 

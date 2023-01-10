@@ -10,6 +10,6 @@
 *.sw?
 
 # Ignore the runtime specific files
-/.env
+/env
 node_modules
 dist

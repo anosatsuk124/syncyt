@@ -1,9 +1,15 @@
-import { useState, createRef } from 'react';
+import { useState, createRef, useEffect, RefObject } from 'react';
 import { Box, Button, Heading, Input, Text } from '@chakra-ui/react';
 import { playerOptsAtom } from './states/atoms';
 import { PlayerOpts } from './states/types';
 import { useAtom } from 'jotai';
-import { getEmbeddedYoutubeUrl } from './api/youtube';
+import { getEmbeddedYoutubeUrl, getYoutubeIdFromUrl } from './api/youtube';
+import { io } from 'socket.io-client';
+import { SyncData } from './types';
+import YoutubeController from '@itkyk/youtube-controller';
+
+const socket = io();
+YoutubeController.initYoutubeApi();
 
 const InputEmbeddedYouTubeUrl = () => {
     const [optsJotai, setOptsJotai] = useAtom(playerOptsAtom);
@@ -13,7 +19,9 @@ const InputEmbeddedYouTubeUrl = () => {
         <Box>
             <Input
                 value={opts.url}
-                onChange={(e) => setOpts({ url: e.target.value })}
+                onChange={(e) =>
+                    setOpts({ url: e.target.value, currentTime: 0 })
+                }
                 placeholder="Enter YouTube URL from the share button"
             />
             <Button onClick={() => setOptsJotai(opts)}>Submit</Button>
@@ -21,21 +29,26 @@ const InputEmbeddedYouTubeUrl = () => {
     );
 };
 
-type PlayerElement = JSX.Element;
-
 interface Player {
-    iframeRef: React.RefObject<HTMLIFrameElement>;
-    playerElement: PlayerElement;
+    playerElement: JSX.Element;
+    playerController: YoutubeController;
 }
 
-const createPlayer = (playerOpts: PlayerOpts): Player => {
-    const iframeRef = createRef<HTMLIFrameElement>();
+const createPlayer = (): Player => {
+    const [playerOpts, setPlayerOpts] = useAtom(playerOptsAtom);
+    const [currentTime, setCurrentTime] = useState(0);
 
-    try {
-        const embeddedUrl = getEmbeddedYoutubeUrl(playerOpts.url);
+    const url = getEmbeddedYoutubeUrl(playerOpts.url);
+    const playerRef = createRef<HTMLDivElement>();
+    const playerElement = <Box ref={playerRef}></Box>;
 
-        const playerElement = <iframe src={embeddedUrl} ref={iframeRef} />;
-        return { iframeRef, playerElement };
+    const youtubeId = getYoutubeIdFromUrl(playerOpts.url);
+
+    const player = new YoutubeController(youtubeId!, playerRef.current!, {});
+
+    return { playerElement, playerController: player };
+
+    /* TODO: Implement error handling
     } catch {
         const errorMessages = (
             <Text>
@@ -43,22 +56,63 @@ const createPlayer = (playerOpts: PlayerOpts): Player => {
                 will be fix.)
             </Text>
         );
-        return { iframeRef, playerElement: errorMessages };
+        return errorMessages;
     }
+        */
 };
 
 interface RenderPlayerProps {
-    playerElement: PlayerElement;
+    playerElement: Player;
 }
 
 const RenderPlayer = (renderPlayerProps: RenderPlayerProps) => {
     const { playerElement } = renderPlayerProps;
-    return <Box>{playerElement}</Box>;
+    return <Box>{playerElement.playerElement}</Box>;
+};
+
+const syncPlayer = () => {
+    const [playerOpts, setPlayerOpts] = useAtom(playerOptsAtom);
+
+    const recivedSyncDataArray: SyncData[] = [];
+
+    socket.on('message', (data) => {
+        console.log(data);
+        const recivedSyncData = {
+            currentPlayingTimestamp: data.currentPlayingTimestamp,
+            sentTimestamp: new Date(data.sentTimestamp),
+        };
+        recivedSyncDataArray.push(recivedSyncData);
+        if (recivedSyncDataArray.length < socket.listeners.length) {
+            return;
+        }
+        recivedSyncDataArray.sort((a, b) => {
+            return a.sentTimestamp.getTime() - b.sentTimestamp.getTime();
+        });
+
+        const dataToSync = recivedSyncDataArray[0];
+
+        setPlayerOpts({
+            url: playerOpts.url,
+            currentTime: dataToSync.currentPlayingTimestamp,
+        });
+    });
+
+    setInterval(() => {
+        const currentPlayingTimestamp: number = playerOpts.currentTime;
+        const sentTimestamp = new Date();
+
+        const syncData: SyncData = {
+            currentPlayingTimestamp,
+            sentTimestamp,
+        };
+
+        socket.emit('sync', syncData);
+    }, 10000);
 };
 
 function App() {
     const [opts, setOpts] = useAtom(playerOptsAtom);
-    const player = createPlayer(opts);
+    syncPlayer();
 
     return (
         <Box>
@@ -67,7 +121,7 @@ function App() {
                 Watch YouTube videos with your friends synchronously
             </Text>
             <InputEmbeddedYouTubeUrl />
-            <RenderPlayer playerElement={player!.playerElement} />
+            <RenderPlayer playerElement={createPlayer()} />
         </Box>
     );
 }

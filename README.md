@@ -8,7 +8,7 @@ This makes you able to watch the same videos with someone at the same time!
 
 ## Contributing
 
-This project is managed by `devbox`. If you do not use famous shells, we recommend using (or installing) `direnv`.
+This project is managed by `devbox`. If your shell is not too famous, we recommend using (or installing) `direnv`.
 
 ## Copyright
 

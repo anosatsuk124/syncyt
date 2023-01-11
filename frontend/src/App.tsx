@@ -1,4 +1,4 @@
-import { useState, useRef, createRef, useEffect } from 'react';
+import { useState, createRef } from 'react';
 import { Box, Button, Heading, Input, Text } from '@chakra-ui/react';
 import { playerOptsAtom } from './states/atoms';
 import { PlayerOpts } from './states/types';
@@ -7,6 +7,7 @@ import { useAtom } from 'jotai';
 const InputEmbeddedYouTubeUrl = () => {
     const [optsJotai, setOptsJotai] = useAtom(playerOptsAtom);
     const [opts, setOpts] = useState<PlayerOpts>(optsJotai);
+
     return (
         <Box>
             <Input
@@ -19,28 +20,28 @@ const InputEmbeddedYouTubeUrl = () => {
     );
 };
 
-type PlayerComponent = JSX.Element;
+type PlayerElement = JSX.Element;
 
 interface Player {
     iframeRef: React.RefObject<HTMLIFrameElement>;
-    playerComponent: PlayerComponent;
+    playerElement: PlayerElement;
 }
 
 const createPlayer = (playerOpts: PlayerOpts): Player => {
     const iframeRef = createRef<HTMLIFrameElement>();
-    const playerComponent = (
+    const playerElement = (
         <iframe src={playerOpts.embeddedUrl} ref={iframeRef} />
     );
-    return { iframeRef, playerComponent };
+    return { iframeRef, playerElement };
 };
 
 interface RenderPlayerProps {
-    playerComponent: PlayerComponent;
+    playerElement: PlayerElement;
 }
 
 const RenderPlayer = (renderPlayerProps: RenderPlayerProps) => {
-    const { playerComponent } = renderPlayerProps;
-    return <Box>{playerComponent}</Box>;
+    const { playerElement } = renderPlayerProps;
+    return <Box>{playerElement}</Box>;
 };
 
 function App() {
@@ -54,7 +55,7 @@ function App() {
                 Watch YouTube videos with your friends synchronously
             </Text>
             <InputEmbeddedYouTubeUrl />
-            <RenderPlayer playerComponent={player!.playerComponent} />
+            <RenderPlayer playerElement={player!.playerElement} />
         </Box>
     );
 }

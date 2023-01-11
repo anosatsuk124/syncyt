@@ -4,8 +4,11 @@ This makes you able to watch the same videos with someone at the same time!
 
 ## Usage
 
-## Configure your server
+### Configure your server
 
+## Contributing
+
+This project is managed by `devbox`. If you do not use famous shells, we recommend using (or installing) `direnv`.
 
 ## Copyright
 

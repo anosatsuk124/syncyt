@@ -1,46 +1,33 @@
-import { Server } from 'ws';
+import { Server } from 'socket.io';
 import express from 'express';
 import http from 'http';
 import { config } from 'dotenv';
 
 const result = config({
-    path: '../env/server/.env',
+    path: __dirname + '/../env/server/.env',
 });
+
+if (result.error) {
+    throw result.error;
+}
 
 const PORT = Number(process.env.PORT) || 3000;
 
 const app = express();
 const server = http.createServer(app);
 
-const wss = new Server({ server: server });
-const clientsByChannel = new Map();
+const io = new Server(server);
 
-wss.on('connection', (client, req) => {
-    const channel = new URL(
-        req.url as string,
-        `http://${req.headers.host}`
-    ).pathname
-        .split('/')
-        .slice(-1)[0];
+interface SyncData {
+    currentPlayingTimestamp: number;
+    sentTimestamp: Date;
+}
 
-    if (!clientsByChannel.has(channel)) {
-        clientsByChannel.set(channel, new Set());
-    }
-
-    clientsByChannel.get(channel).add(client);
-
-    client.on('message', (data) => {
-        for (const receiver of clientsByChannel.get(channel) || []) {
-            if (receiver == client) continue;
-            try {
-                receiver.send(data);
-            } catch (e) {
-                console.warn(e);
-            }
-        }
-
-        console.log('%s', data);
-        client.send(data);
+io.on('connection', (socket) => {
+    console.log(`a user connected: ${socket.id}`);
+    socket.on('sync', (message: SyncData) => {
+        console.log(`message: ${message}`);
+        socket.broadcast.emit('sync', message);
     });
 });
 

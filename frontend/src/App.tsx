@@ -3,6 +3,7 @@ import { Box, Button, Heading, Input, Text } from '@chakra-ui/react';
 import { playerOptsAtom } from './states/atoms';
 import { PlayerOpts } from './states/types';
 import { useAtom } from 'jotai';
+import { getEmbeddedYoutubeUrl } from './api/youtube';
 
 const InputEmbeddedYouTubeUrl = () => {
     const [optsJotai, setOptsJotai] = useAtom(playerOptsAtom);
@@ -11,9 +12,9 @@ const InputEmbeddedYouTubeUrl = () => {
     return (
         <Box>
             <Input
-                value={opts.embeddedUrl}
-                onChange={(e) => setOpts({ embeddedUrl: e.target.value })}
-                placeholder="Enter Embedded YouTube URL"
+                value={opts.url}
+                onChange={(e) => setOpts({ url: e.target.value })}
+                placeholder="Enter YouTube URL from the share button"
             />
             <Button onClick={() => setOptsJotai(opts)}>Submit</Button>
         </Box>
@@ -29,10 +30,21 @@ interface Player {
 
 const createPlayer = (playerOpts: PlayerOpts): Player => {
     const iframeRef = createRef<HTMLIFrameElement>();
-    const playerElement = (
-        <iframe src={playerOpts.embeddedUrl} ref={iframeRef} />
-    );
-    return { iframeRef, playerElement };
+
+    try {
+        const embeddedUrl = getEmbeddedYoutubeUrl(playerOpts.url);
+
+        const playerElement = <iframe src={embeddedUrl} ref={iframeRef} />;
+        return { iframeRef, playerElement };
+    } catch {
+        const errorMessages = (
+            <Text>
+                The URL must be got from the YouTube share button. (This issues
+                will be fix.)
+            </Text>
+        );
+        return { iframeRef, playerElement: errorMessages };
+    }
 };
 
 interface RenderPlayerProps {

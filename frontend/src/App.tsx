@@ -6,10 +6,9 @@ import { useAtom } from 'jotai';
 import { getEmbeddedYoutubeUrl, getYoutubeIdFromUrl } from './api/youtube';
 import { io } from 'socket.io-client';
 import { SyncData } from './types';
-import YoutubeController from '@itkyk/youtube-controller';
+import YouTubePlayer from 'yt-player';
 
 const socket = io();
-YoutubeController.initYoutubeApi();
 
 const InputEmbeddedYouTubeUrl = () => {
     const [optsJotai, setOptsJotai] = useAtom(playerOptsAtom);
@@ -30,23 +29,31 @@ const InputEmbeddedYouTubeUrl = () => {
 };
 
 interface Player {
-    playerElement: JSX.Element;
-    playerController: YoutubeController;
+    playerController: YouTubePlayer;
 }
 
-const createPlayer = (): Player => {
-    const [playerOpts, setPlayerOpts] = useAtom(playerOptsAtom);
-    const [currentTime, setCurrentTime] = useState(0);
+const createPlayer = (
+    playerRef: RefObject<HTMLDivElement>,
+    url: string
+): YouTubePlayer => {
+    const youtubeId = getYoutubeIdFromUrl(url);
 
-    const url = getEmbeddedYoutubeUrl(playerOpts.url);
-    const playerRef = createRef<HTMLDivElement>();
-    const playerElement = <Box ref={playerRef}></Box>;
+    const playerVars = {
+        height: '1920',
+        width: '1080',
+    };
 
-    const youtubeId = getYoutubeIdFromUrl(playerOpts.url);
+    console.log(playerRef.current);
 
-    const player = new YoutubeController(youtubeId!, playerRef.current!, {});
+    const player = new YouTubePlayer(playerRef.current!);
 
-    return { playerElement, playerController: player };
+    if (!youtubeId) {
+        return player;
+    }
+
+    player.load(youtubeId);
+
+    return player;
 
     /* TODO: Implement error handling
     } catch {
@@ -61,21 +68,34 @@ const createPlayer = (): Player => {
         */
 };
 
-interface RenderPlayerProps {
-    playerElement: Player;
+interface renderPlayer {
+    Player: React.FC;
+    playerElementRef: RefObject<HTMLDivElement>;
 }
 
-const RenderPlayer = (renderPlayerProps: RenderPlayerProps) => {
-    const { playerElement } = renderPlayerProps;
-    return <Box>{playerElement.playerElement}</Box>;
+const renderPlayer = (): renderPlayer => {
+    const playerElementRef = createRef<HTMLDivElement>();
+    const Player = () => {
+        return <div ref={playerElementRef}></div>;
+    };
+    return { Player, playerElementRef };
 };
 
-const syncPlayer = () => {
-    const [playerOpts, setPlayerOpts] = useAtom(playerOptsAtom);
+const syncPlayer = (ytPlayer: YouTubePlayer | undefined) => {
+    // const [playerOpts, setPlayerOpts] = useAtom(playerOptsAtom);
+    if (!ytPlayer) {
+        console.log('youtubeController is undefined');
+        return;
+    }
+
+    if (ytPlayer === null) {
+        console.log('youtubeController is null');
+        return;
+    }
 
     const recivedSyncDataArray: SyncData[] = [];
 
-    socket.on('message', (data) => {
+    socket.on('sync', (data) => {
         console.log(data);
         const recivedSyncData = {
             currentPlayingTimestamp: data.currentPlayingTimestamp,
@@ -91,14 +111,19 @@ const syncPlayer = () => {
 
         const dataToSync = recivedSyncDataArray[0];
 
-        setPlayerOpts({
-            url: playerOpts.url,
-            currentTime: dataToSync.currentPlayingTimestamp,
-        });
+        // FIXME: This process should be split with another function.
+        ytPlayer.seek(dataToSync.currentPlayingTimestamp);
+
+        //  setPlayerOpts({
+        //      url: playerOpts.url,
+        //      currentTime: dataToSync.currentPlayingTimestamp,
+        //  });
     });
 
     setInterval(() => {
-        const currentPlayingTimestamp: number = playerOpts.currentTime;
+        // FIXME: This process should be split with another function.
+        const currentPlayingTimestamp = ytPlayer.getCurrentTime();
+        /// const currentPlayingTimestamp: number = playerOpts.currentTime;
         const sentTimestamp = new Date();
 
         const syncData: SyncData = {
@@ -112,7 +137,15 @@ const syncPlayer = () => {
 
 function App() {
     const [opts, setOpts] = useAtom(playerOptsAtom);
-    syncPlayer();
+    const { Player, playerElementRef } = renderPlayer();
+
+    let player: YouTubePlayer;
+
+    useEffect(() => {
+        console.log('useEffect');
+        player = createPlayer(playerElementRef, opts.url);
+        syncPlayer(player);
+    });
 
     return (
         <Box>
@@ -121,7 +154,7 @@ function App() {
                 Watch YouTube videos with your friends synchronously
             </Text>
             <InputEmbeddedYouTubeUrl />
-            <RenderPlayer playerElement={createPlayer()} />
+            <Player />
         </Box>
     );
 }

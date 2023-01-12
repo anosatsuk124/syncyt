@@ -1077,11 +1077,6 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.16.16.tgz#ee22fed0b2e0c00ce895cdfae9d32ef069a12e04"
   integrity sha512-1YYpoJ39WV/2bnShPwgdzJklc+XS0bysN6Tpnt1cWPdeoKOG4RMEY1g7i534QxXX/rPvNx/NLJQTTCeORYzipg==
 
-"@itkyk/youtube-controller@^2.0.4":
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/@itkyk/youtube-controller/-/youtube-controller-2.0.4.tgz#27586e640625885afc92dc68dce009a50ec21e95"
-  integrity sha512-SrmAIoDR9FBQ2yIxGaUu+SSgasyDfF/cWeGAk46/YRutyziJRreUGK5IVxbc0w++dHtehVq7tW4FEa85idzUzA==
-
 "@motionone/animation@^10.15.1":
   version "10.15.1"
   resolved "https://registry.yarnpkg.com/@motionone/animation/-/animation-10.15.1.tgz#4a85596c31cbc5100ae8eb8b34c459fb0ccf6807"
@@ -1332,6 +1327,11 @@
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/@types/uuid/-/uuid-9.0.0.tgz#53ef263e5239728b56096b0a869595135b7952d2"
   integrity sha512-kr90f+ERiQtKWMz5rP32ltJ/BtULDI5RVO0uavn1HQUOwjx0R1h0rnDYNL0CepF1zL5bSY6FISAfd9tOdDhU5Q==
+
+"@types/yt-player@^3.5.1":
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/@types/yt-player/-/yt-player-3.5.1.tgz#7e392c4d0e331f4c60eadd3cef011c846a5d1a7d"
+  integrity sha512-OvcbE+ageSYE5Mnw3j062mIQb0ducQWaJYFZUlTRgsAa8PygzgKwfxFlbMQafkAzYaSNi93H4r9Z3KBAXEGqEw==
 
 "@vitejs/plugin-react-swc@^3.0.0":
   version "3.0.1"
@@ -1757,6 +1757,11 @@ etag@~1.8.1:
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==
 
+events@^3.3.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.3.0.tgz#31a95ad0a924e2d2c419a813aeb2c4e878ea7400"
+  integrity sha512-mQw+2fkQbALzQ7V0MY0IqdnXNOeTtP4r0lN9z7AAawCXgqea7bDii20AYrIBrFd/Hx0M2Ocz6S111CaFkUcb0Q==
+
 express@^4.18.2:
   version "4.18.2"
   resolved "https://registry.yarnpkg.com/express/-/express-4.18.2.tgz#3fabe08296e930c796c19e3c516979386ba9fd59"
@@ -2176,6 +2181,11 @@ load-json-file@^4.0.0:
     parse-json "^4.0.0"
     pify "^3.0.0"
     strip-bom "^3.0.0"
+
+load-script2@^2.0.1:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/load-script2/-/load-script2-2.0.6.tgz#eb32093e4ec3ce58e4621c85c00e4e839fcaf010"
+  integrity sha512-pyuw/AR+ycZkRKgkMyXOIf/o2OnRQPc9grjZ04wVOeoJ7SqX97WlcZahl+3/r5qi09L/5d0iCVZ0q4OqNT/v0Q==
 
 lodash.mergewith@4.6.2:
   version "4.6.2"
@@ -2938,3 +2948,10 @@ yaml@^1.10.0:
   version "1.10.2"
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-1.10.2.tgz#2301c5ffbf12b467de8da2333a459e29e7920e4b"
   integrity sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==
+
+yt-player@^3.6.1:
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/yt-player/-/yt-player-3.6.1.tgz#1ba9a15b60a0768e0a3049a2e3a19e42e5a5bb8b"
+  integrity sha512-JzpR/rlB73QCSq1V7YmE0rNceuThbJhDrjb0dNSk+2QJsdFWuU6quMofUkuiiXu71P3wgzyhLuNl/Q0ZgQlbwA==
+  dependencies:
+    load-script2 "^2.0.1"

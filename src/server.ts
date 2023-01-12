@@ -3,12 +3,14 @@ import express from 'express';
 import http from 'http';
 import { config } from 'dotenv';
 
-const result = config({
-    path: __dirname + '/../env/server/.env',
-});
+if (process.env.NODE_ENV !== 'production') {
+    const result = config({
+        path: __dirname + '/../env/server/.env',
+    });
 
-if (result.error) {
-    throw result.error;
+    if (result.error) {
+        throw result.error;
+    }
 }
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -21,13 +23,23 @@ const io = new Server(server);
 interface SyncData {
     currentPlayingTimestamp: number;
     sentTimestamp: Date;
+    userID: string;
 }
+
+const recivedSyncDataArray: SyncData[] = [];
 
 io.on('connection', (socket) => {
     console.log(`a user connected: ${socket.id}`);
-    socket.on('sync', (message: SyncData) => {
-        console.log(`message: ${message}`);
-        socket.broadcast.emit('sync', message);
+
+    socket.to(socket.id).emit('fetchId', socket.id);
+
+    socket.on('sync', (data) => {
+        const recivedSyncData = {
+            currentPlayingTimestamp: data.currentPlayingTimestamp,
+            sentTimestamp: new Date(data.sentTimestamp),
+            userID: data.userID,
+        };
+        socket.broadcast.emit('sync', data);
     });
 });
 

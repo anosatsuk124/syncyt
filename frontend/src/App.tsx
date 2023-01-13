@@ -106,6 +106,7 @@ const syncPlayer = (
         socket.on('sync', (data) => {
             console.log(data);
             if (masterUserId == data.userID) {
+                console.log(`recieved master user's data`);
                 // FIXME: This is hard coded
                 if (
                     Math.abs(
@@ -147,7 +148,12 @@ const SetMasterUser = () => {
         <Box>
             <Input
                 placeholder="Enter master ID"
-                value={opts.masterUserId}
+                value={(() => {
+                    if (opts.masterUserId === null) {
+                        return '';
+                    }
+                    return opts.masterUserId;
+                })()}
                 onChange={(e) => {
                     setOpts({
                         masterUserId: e.target.value,
@@ -166,6 +172,7 @@ const SetMasterUser = () => {
                         });
                     }
                 }}
+                checked={opts.masterUserId === null}
             >
                 I am the master user
             </Checkbox>
@@ -181,8 +188,8 @@ function App() {
     let player: YouTubePlayer;
 
     useEffect(() => {
-        console.log('useEffect');
         player = createPlayer(playerElementRef, opts.url);
+        console.log('masterUserId', opts.masterUserId);
         syncPlayer(player, id, opts.masterUserId);
     });
 

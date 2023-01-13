@@ -4,4 +4,5 @@ import { PlayerOpts } from './types';
 export const playerOptsAtom = atom<PlayerOpts>({
     url: '',
     currentTime: 0,
+    masterUserId: '',
 });

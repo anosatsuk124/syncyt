@@ -4,6 +4,8 @@ This makes you able to watch the same videos with someone at the same time!
 
 ## Usage
 
+![Usage](docs/Usage.gif)
+
 ### Configure your server
 
 ## Contributing

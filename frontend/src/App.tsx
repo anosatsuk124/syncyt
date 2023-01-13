@@ -105,7 +105,7 @@ const syncPlayer = (
     ytPlayer.on('playing', () => {
         socket.on('sync', (data) => {
             console.log(data);
-            if (masterUserId != data.userID) {
+            if (masterUserId == data.userID) {
                 // FIXME: This is hard coded
                 if (
                     ytPlayer.getCurrentTime() - data.currentPlayingTimestamp >

@@ -1,4 +1,4 @@
-# Synced
+# Syncyt
 
 This makes you able to watch the same videos with someone at the same time! 
 

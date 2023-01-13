@@ -1,5 +1,5 @@
 import { useState, createRef, useEffect, RefObject } from 'react';
-import { Box, Button, Checkbox, Heading, Input, Text } from '@chakra-ui/react';
+import { Box, Button, Checkbox, Heading, Input, Text, Container, Divider } from '@chakra-ui/react';
 import { playerOptsAtom } from './states/atoms';
 import { PlayerOpts } from './states/types';
 import { useAtom } from 'jotai';
@@ -8,6 +8,7 @@ import { io } from 'socket.io-client';
 import { SyncData } from './types';
 import YouTubePlayer from 'yt-player';
 import { v4 as uuidv4 } from 'uuid';
+import "@fontsource/varela-round";
 
 const socket = io();
 
@@ -195,13 +196,20 @@ function App() {
     });
 
     return (
-        <Box>
-            <Heading>Syncyt</Heading>
-            <Text fontSize="xl">
-                Watch YouTube videos with your friends synchronously
-            </Text>
-            <Box>
+        <Container maxW='container.md' p={3}>
+            <Heading variant="logo">
+                Syncyt
+            </Heading>
+            <Box py={3}>
+                <Text fontSize="xl">
+                    Watch YouTube videos with your friends synchronously
+                </Text>
+            </Box>
+            <Divider />
+            <Box py={3}>
                 <Text fontSize="xl">Your ID: {id}</Text>
+            </Box>
+            <Box py={3}>
                 <Input
                     placeholder="Enter master ID"
                     value={(() => {
@@ -226,7 +234,7 @@ function App() {
             </Box>
             <InputEmbeddedYouTubeUrl />
             <Player />
-        </Box>
+        </Container>
     );
 }
 

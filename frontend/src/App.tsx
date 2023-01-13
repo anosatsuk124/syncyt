@@ -183,14 +183,15 @@ const SetMasterUser = () => {
 function App() {
     const [opts, setOpts] = useAtom(playerOptsAtom);
     const { Player, playerElementRef } = renderPlayer();
+    const [masterId, setMasterId] = useState<string | null>('');
     const id = uuidv4();
 
     let player: YouTubePlayer;
 
     useEffect(() => {
         player = createPlayer(playerElementRef, opts.url);
-        console.log('masterUserId', opts.masterUserId);
-        syncPlayer(player, id, opts.masterUserId);
+        console.log('masterUserId', masterId);
+        syncPlayer(player, id, masterId);
     });
 
     return (
@@ -199,8 +200,30 @@ function App() {
             <Text fontSize="xl">
                 Watch YouTube videos with your friends synchronously
             </Text>
-            <Text fontSize="xl">Your ID: {id}</Text>
-            <SetMasterUser />
+            <Box>
+                <Text fontSize="xl">Your ID: {id}</Text>
+                <Input
+                    placeholder="Enter master ID"
+                    value={(() => {
+                        if (masterId === null) {
+                            return '';
+                        }
+                        return masterId;
+                    })()}
+                    onChange={(e) => {
+                        setMasterId(e.target.value);
+                    }}
+                />
+                <Checkbox
+                    onChange={(e) => {
+                        if (e.target.checked) {
+                            setMasterId(null);
+                        }
+                    }}
+                >
+                    I am the master user
+                </Checkbox>
+            </Box>
             <InputEmbeddedYouTubeUrl />
             <Player />
         </Box>

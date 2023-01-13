@@ -108,8 +108,9 @@ const syncPlayer = (
             if (masterUserId == data.userID) {
                 // FIXME: This is hard coded
                 if (
-                    ytPlayer.getCurrentTime() - data.currentPlayingTimestamp >
-                    3
+                    Math.abs(
+                        ytPlayer.getCurrentTime() - data.currentPlayingTimestamp
+                    ) > 3
                 ) {
                     console.log('seeked', data.currentPlayingTimestamp);
                     ytPlayer.seek(data.currentPlayingTimestamp);
@@ -123,9 +124,6 @@ const syncPlayer = (
         });
 
         setInterval(() => {
-            if (masterUserId != null) {
-                return;
-            }
             // FIXME: This process should be split with another function.
             const currentPlayingTimestamp = ytPlayer.getCurrentTime();
             /// const currentPlayingTimestamp: number = playerOpts.currentTime;

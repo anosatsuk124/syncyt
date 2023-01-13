@@ -1,5 +1,5 @@
 import { useState, createRef, useEffect, RefObject } from 'react';
-import { Box, Button, Checkbox, Heading, Input, Text, Container, Divider } from '@chakra-ui/react';
+import { Box, Button, Checkbox, Heading, Input, Text, Container, Divider, Stack } from '@chakra-ui/react';
 import { playerOptsAtom } from './states/atoms';
 import { PlayerOpts } from './states/types';
 import { useAtom } from 'jotai';
@@ -9,6 +9,90 @@ import { SyncData } from './types';
 import YouTubePlayer from 'yt-player';
 import { v4 as uuidv4 } from 'uuid';
 import "@fontsource/varela-round";
+
+function App() {
+    const [playerOpts, setPlayerOpts] = useAtom(playerOptsAtom);
+    const [playerOptsJotai, setPlayerOptsJotai] = useAtom(playerOptsAtom);
+    const [playerOptsState, setPlayerOptsState] = useState<PlayerOpts>(playerOptsJotai);
+    const { Player, playerElementRef } = renderPlayer();
+    const [masterId, setMasterId] = useState<string | null>('');
+    const id = uuidv4();
+
+    let player: YouTubePlayer;
+
+    useEffect(() => {
+        player = createPlayer(playerElementRef, playerOpts.url);
+        console.log('masterUserId', masterId);
+        syncPlayer(player, id, masterId);
+    });
+
+    return (
+        <Container maxW='container.md' p={3}>
+            <Stack spacing={4}>
+                <Heading as="h1" variant="logo">
+                    Syncyt
+                </Heading>
+                <Box>
+                    <Text fontSize="xl">
+                        Watch YouTube videos with your friends synchronously
+                    </Text>
+                </Box>
+                <Divider />
+                <Stack spacing={2}>
+                    <Heading size="md">Step1: Enter the URL</Heading>
+                    <Input
+                        value={playerOpts.url}
+                        onChange={(e) =>
+                            setPlayerOpts({
+                                url: e.target.value,
+                                currentTime: playerOpts.currentTime,
+                                masterUserId: playerOpts.masterUserId,
+                            })
+                        }
+                        placeholder="Enter YouTube URL from the share button"
+                    />
+                </Stack>
+                <Divider />
+                <Stack spacing={2}>
+                    <Heading size="md">Step2: Get or Enter the master ID</Heading>
+                </Stack>
+                <Box>
+                    <Checkbox
+                        onChange={(e) => {
+                            if (e.target.checked) {
+                                setMasterId(null);
+                            }
+                        }}
+                    >
+                        I am the master user
+                    </Checkbox>
+                    <Input
+                        placeholder="Enter master ID"
+                        value={(() => {
+                            if (masterId === null) {
+                                return '';
+                            }
+                            return masterId;
+                        })()}
+                        onChange={(e) => {
+                            setMasterId(e.target.value);
+                        }}
+                    />
+                </Box>
+                <Box>
+                    <Text fontSize="xl">Your ID: {id}</Text>
+                </Box>
+                <Box>
+                    <Button onClick={() => setPlayerOptsJotai(playerOpts)}>Submit</Button>
+                </Box>
+                <Divider />
+                <Player />
+            </Stack>
+        </Container>
+    );
+}
+
+export default App;
 
 const socket = io();
 
@@ -33,6 +117,9 @@ const InputEmbeddedYouTubeUrl = () => {
         </Box>
     );
 };
+
+const ExportYoutubeUrl = (opts: PlayerOpts) => {
+}
 
 interface Player {
     playerController: YouTubePlayer;
@@ -77,7 +164,7 @@ const createPlayer = (
 interface renderPlayer {
     Player: React.FC;
     playerElementRef: RefObject<HTMLDivElement>;
-}
+}; 
 
 const renderPlayer = (): renderPlayer => {
     const playerElementRef = createRef<HTMLDivElement>();
@@ -180,62 +267,3 @@ const SetMasterUser = () => {
         </Box>
     );
 };
-
-function App() {
-    const [opts, setOpts] = useAtom(playerOptsAtom);
-    const { Player, playerElementRef } = renderPlayer();
-    const [masterId, setMasterId] = useState<string | null>('');
-    const id = uuidv4();
-
-    let player: YouTubePlayer;
-
-    useEffect(() => {
-        player = createPlayer(playerElementRef, opts.url);
-        console.log('masterUserId', masterId);
-        syncPlayer(player, id, masterId);
-    });
-
-    return (
-        <Container maxW='container.md' p={3}>
-            <Heading variant="logo">
-                Syncyt
-            </Heading>
-            <Box py={3}>
-                <Text fontSize="xl">
-                    Watch YouTube videos with your friends synchronously
-                </Text>
-            </Box>
-            <Divider />
-            <Box py={3}>
-                <Text fontSize="xl">Your ID: {id}</Text>
-            </Box>
-            <Box py={3}>
-                <Input
-                    placeholder="Enter master ID"
-                    value={(() => {
-                        if (masterId === null) {
-                            return '';
-                        }
-                        return masterId;
-                    })()}
-                    onChange={(e) => {
-                        setMasterId(e.target.value);
-                    }}
-                />
-                <Checkbox
-                    onChange={(e) => {
-                        if (e.target.checked) {
-                            setMasterId(null);
-                        }
-                    }}
-                >
-                    I am the master user
-                </Checkbox>
-            </Box>
-            <InputEmbeddedYouTubeUrl />
-            <Player />
-        </Container>
-    );
-}
-
-export default App;

@@ -1077,6 +1077,11 @@
   resolved "https://registry.yarnpkg.com/@esbuild/win32-x64/-/win32-x64-0.16.16.tgz#ee22fed0b2e0c00ce895cdfae9d32ef069a12e04"
   integrity sha512-1YYpoJ39WV/2bnShPwgdzJklc+XS0bysN6Tpnt1cWPdeoKOG4RMEY1g7i534QxXX/rPvNx/NLJQTTCeORYzipg==
 
+"@fontsource/varela-round@^4.5.9":
+  version "4.5.9"
+  resolved "https://registry.yarnpkg.com/@fontsource/varela-round/-/varela-round-4.5.9.tgz#ae719b6f00e5041e0a147321eb84fce7619c7e71"
+  integrity sha512-wvxP8Iw3BxEVTErju609diXe55qr87lp+NCv/UX7vcFc+YWzl2piMw0pXbR/HNcJcICrkIs2UD2x2fonyEY01w==
+
 "@motionone/animation@^10.15.1":
   version "10.15.1"
   resolved "https://registry.yarnpkg.com/@motionone/animation/-/animation-10.15.1.tgz#4a85596c31cbc5100ae8eb8b34c459fb0ccf6807"

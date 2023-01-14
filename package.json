@@ -19,6 +19,7 @@
         "@chakra-ui/react": "^2.4.6",
         "@emotion/react": "^11.10.5",
         "@emotion/styled": "^11.10.5",
+        "@fontsource/varela-round": "^4.5.9",
         "@types/uuid": "^9.0.0",
         "dotenv": "^16.0.3",
         "events": "^3.3.0",

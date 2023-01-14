@@ -1,5 +1,38 @@
 import { useState, createRef, useEffect, RefObject } from 'react';
-import { Box, Button, Checkbox, Heading, Input, Text } from '@chakra-ui/react';
+import { 
+    Box, 
+    Button, 
+    Checkbox, 
+    Heading, 
+    Input, 
+    Text, 
+    Container, 
+    Divider, 
+    Stack,
+    Tab,
+    Tabs,
+    TabList,
+    TabPanel,
+    TabPanels,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    MenuItemOption,
+    MenuGroup,
+    MenuOptionGroup,
+    MenuDivider,
+    Card,
+    UnorderedList,
+    ListItem,
+    CardHeader,
+    CardBody,
+    StackDivider,
+    HStack,
+    Flex,
+    Center,
+    Collapse,
+} from '@chakra-ui/react';
 import { playerOptsAtom } from './states/atoms';
 import { PlayerOpts } from './states/types';
 import { useAtom } from 'jotai';
@@ -8,6 +41,192 @@ import { io } from 'socket.io-client';
 import { SyncData } from './types';
 import YouTubePlayer from 'yt-player';
 import { v4 as uuidv4 } from 'uuid';
+import "@fontsource/varela-round";
+import { useDisclosure } from '@chakra-ui/react'
+
+function App() {
+    const [playerOpts, setPlayerOpts] = useAtom(playerOptsAtom);
+    const [playerOptsJotai, setPlayerOptsJotai] = useAtom(playerOptsAtom);
+    const [playerOptsState, setPlayerOptsState] = useState<PlayerOpts>(playerOptsJotai);
+
+    const { Player, playerElementRef } = renderPlayer();
+
+    const [masterId, setMasterId] = useState<string | null>('');
+
+    const id = uuidv4();
+
+    const masterDisclosure = useDisclosure(); 
+    const participantDisclosure = useDisclosure();
+
+    let player: YouTubePlayer;
+
+    useEffect(() => {
+        player = createPlayer(playerElementRef, playerOpts.url);
+        console.log('masterUserId', masterId);
+        syncPlayer(player, id, masterId);
+    });
+
+    return (
+        <Container maxW='container.sm' p={3}>
+            <Stack spacing={4}>
+                <Heading as="h1" variant="logo">
+                    Syncyt
+                </Heading>
+
+                <Box>
+                    <Text fontSize="xl">
+                        Watch YouTube videos with your friends synchronously
+                    </Text>
+                </Box>
+
+                <Divider />
+
+                <Stack spacing={4}>
+                    <Heading size="md">Step 1: Enter the URL</Heading>
+
+                    <Input
+                        value={playerOpts.url}
+                        onChange={(e) =>
+                            setPlayerOpts({
+                                url: e.target.value,
+                                currentTime: playerOpts.currentTime,
+                                masterUserId: playerOpts.masterUserId,
+                            })
+                        }
+                        placeholder="Enter YouTube URL from the share button"
+                    />
+                </Stack>
+
+                <Divider />
+
+                <Stack spacing={4}>
+                    <Heading size="md">Step 2: Start or Join to Watch the Video!</Heading>
+                    <Text>
+                        Select whether you watch the video as a Master or a Participant. 
+                    </Text>
+
+                    <Card>
+                        <CardBody>
+                            <Stack spacing={5} divider={<StackDivider />}>
+                                <Stack spacing={3}>
+                                    <Heading size="sm" color="blue.700">
+                                        Master
+                                    </Heading>
+
+                                    <Text>
+                                        You can control the video playback and other participants will follow.
+                                    </Text>
+
+                                    <Button 
+                                        onClick={() => {
+                                            setMasterId(null);
+                                            setPlayerOptsJotai(playerOpts); 
+                                            masterDisclosure.onToggle();
+                                        }}
+                                        colorScheme="blue" variant="outline" 
+                                        size="sm">
+                                        <Text>
+                                            Start to Watch Video as a <b><i>Master</i></b>
+                                        </Text>
+                                    </Button>
+
+                                    <Collapse
+                                        in={masterDisclosure.isOpen}
+                                        animateOpacity>
+                                        <Player />
+                                    </Collapse>
+                                </Stack>
+
+                                <Stack spacing={3}>
+                                    <Heading size="sm" color="teal.700">
+                                        Participant
+                                    </Heading>
+
+                                    <Text>
+                                        You will follow the video playback of a Master.
+                                    </Text>
+
+                                    <HStack>
+                                        <Center>
+                                            <Text 
+                                                size="xs"
+                                                minW="max-content">
+                                                Master ID:
+                                            </Text>
+                                        </Center>
+
+                                        <Input
+                                            value={(() => {
+                                                if (masterId === null) {
+                                                    return '';
+                                                }
+                                                return masterId;
+                                            })()}
+                                            onChange={(e) => {
+                                                setMasterId(e.target.value);
+                                            }}
+                                        />
+                                    </HStack>
+
+                                    <Button 
+                                        onClick={() => {
+                                            setPlayerOptsJotai(playerOpts)
+                                        }}
+                                        colorScheme="teal" 
+                                        variant="outline" 
+                                        size="sm">
+                                        <Text>
+                                            Join to Watch Video as a <b><i>Participant</i></b>
+                                        </Text>
+                                    </Button>
+                                </Stack>
+                            </Stack>
+                        </CardBody>
+                    </Card>
+
+                    <Box>
+                        <Checkbox
+                            onChange={(e) => {
+                                if (e.target.checked) {
+                                    setMasterId(null);
+                                }
+                            }}
+                        >
+                            I am the master user
+                        </Checkbox>
+                        <Input
+                            placeholder="Enter master ID"
+                            value={(() => {
+                                if (masterId === null) {
+                                    return '';
+                                }
+                                return masterId;
+                            })()}
+                            onChange={(e) => {
+                                setMasterId(e.target.value);
+                            }}
+                        />
+                    </Box>
+                    <Box>
+                        <Text fontSize="xl">Your ID: {id}</Text>
+                    </Box>
+                    <Box>
+                        <Button 
+                            onClick={() => {
+                                setPlayerOptsJotai(playerOpts)
+                            }}>
+                            Submit
+                        </Button>
+                    </Box>
+                </Stack>
+                <Divider />
+                <Player />
+            </Stack>
+        </Container>
+    );
+}
+
+export default App;
 
 const socket = io();
 
@@ -76,7 +295,7 @@ const createPlayer = (
 interface renderPlayer {
     Player: React.FC;
     playerElementRef: RefObject<HTMLDivElement>;
-}
+}; 
 
 const renderPlayer = (): renderPlayer => {
     const playerElementRef = createRef<HTMLDivElement>();
@@ -179,55 +398,3 @@ const SetMasterUser = () => {
         </Box>
     );
 };
-
-function App() {
-    const [opts, setOpts] = useAtom(playerOptsAtom);
-    const { Player, playerElementRef } = renderPlayer();
-    const [masterId, setMasterId] = useState<string | null>('');
-    const id = uuidv4();
-
-    let player: YouTubePlayer;
-
-    useEffect(() => {
-        player = createPlayer(playerElementRef, opts.url);
-        console.log('masterUserId', masterId);
-        syncPlayer(player, id, masterId);
-    });
-
-    return (
-        <Box>
-            <Heading>Syncyt</Heading>
-            <Text fontSize="xl">
-                Watch YouTube videos with your friends synchronously
-            </Text>
-            <Box>
-                <Text fontSize="xl">Your ID: {id}</Text>
-                <Input
-                    placeholder="Enter master ID"
-                    value={(() => {
-                        if (masterId === null) {
-                            return '';
-                        }
-                        return masterId;
-                    })()}
-                    onChange={(e) => {
-                        setMasterId(e.target.value);
-                    }}
-                />
-                <Checkbox
-                    onChange={(e) => {
-                        if (e.target.checked) {
-                            setMasterId(null);
-                        }
-                    }}
-                >
-                    I am the master user
-                </Checkbox>
-            </Box>
-            <InputEmbeddedYouTubeUrl />
-            <Player />
-        </Box>
-    );
-}
-
-export default App;
